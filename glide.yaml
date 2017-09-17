@@ -1,0 +1,18 @@
+package: github.com/cage1016/qcloud-decrypt-helper
+import:
+- package: github.com/qeek-dev/cryhel
+  version: ~0.1.3
+- package: github.com/urfave/cli
+  version: ~1.19.1
+- package: gopkg.in/check.v1
+- package: gopkg.in/yaml.v2
+- package: gopkg.in/AlecAivazis/survey.v1
+  version: ~1.3.1
+- package: github.com/mgutz/ansi
+- package: github.com/google/go-querystring
+  subpackages:
+  - query
+- package: github.com/fatih/color
+  version: ~1.5.0
+- package: gopkg.in/tylerb/graceful.v1
+  version: ~1.2.15
