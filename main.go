@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/gobuffalo/packr"
 	"github.com/google/go-querystring/query"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"gopkg.in/tylerb/graceful.v1"
@@ -35,6 +36,7 @@ var (
 	answers   Answers
 	green     = color.New(color.FgHiGreen).SprintFunc()
 	red       = color.New(color.FgRed).SprintFunc()
+	box       = packr.NewBox("./templates")
 	visitLink = ""
 )
 
@@ -248,7 +250,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "parser error => %v", err)
 	}
 
-	t, err := template.ParseFiles("./tpl.html")
+	t, err := template.New("xx").Parse(box.String("tpl.html"))
+	//t, err := template.ParseFiles("./tpl.html")
 	if err != nil {
 		log.Fatal(err)
 	}
