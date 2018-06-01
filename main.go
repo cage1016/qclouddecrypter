@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -31,9 +32,10 @@ const (
 )
 
 var (
-	answers Answers
-	green   = color.New(color.FgHiGreen).SprintFunc()
-	red     = color.New(color.FgRed).SprintFunc()
+	answers   Answers
+	green     = color.New(color.FgHiGreen).SprintFunc()
+	red       = color.New(color.FgRed).SprintFunc()
+	visitLink = ""
 )
 
 type App struct {
@@ -74,6 +76,13 @@ func prettyJSON(data interface{}) (string, error) {
 		return empty, err
 	}
 	return buffer.String(), nil
+}
+
+func Map(in interface{}) map[string]interface{} {
+	var inInterface map[string]interface{}
+	inrec, _ := json.Marshal(in)
+	json.Unmarshal(inrec, &inInterface)
+	return inInterface
 }
 
 func getYaml() (data []byte, err error) {
@@ -239,8 +248,27 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "parser error => %v", err)
 	}
 
-	s, _ := prettyJSON(cret)
-	fmt.Fprintf(w, "%s", s)
+	t, err := template.ParseFiles("./tpl.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s := Map(cret)
+	j, _ := prettyJSON(cret)
+
+	data := struct {
+		AuthLink string
+		Result   string
+		Cret     map[string]interface{}
+		CretJSON string
+	}{
+		AuthLink: visitLink,
+		Result:   m.Get("/?result"),
+		Cret:     s,
+		CretJSON: j,
+	}
+
+	t.Execute(w, data)
 }
 
 func main() {
@@ -259,7 +287,8 @@ func main() {
 		Scopes:   a.Scopes,
 	})
 
-	fmt.Println(green("!"), "Visit", green(fmt.Sprintf(urlPattern, a.Server, v.Encode(), a.Port)))
+	visitLink = fmt.Sprintf(urlPattern, a.Server, v.Encode(), a.Port)
+	fmt.Println(green("!"), "Visit", green(visitLink))
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handler)
